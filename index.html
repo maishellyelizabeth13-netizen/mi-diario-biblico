@@ -68,13 +68,13 @@
         }
 
         .dot {
-            width: 32px; height: 32px;
+            width: 34px; height: 34px;
             border: 1px solid #f1f5f9;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             background: white;
             display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 600; color: #94a3b8;
+            font-size: 12px; font-weight: 600; color: #94a3b8;
             transition: all 0.1s;
             touch-action: none;
         }
@@ -133,13 +133,11 @@
 
     <div id="save-indicator" class="save-toast">✓ PROGRESO GUARDADO</div>
 
-    <!-- PANTALLA CARGA -->
     <div id="loading-overlay">
         <div class="animate-bounce text-pink-600 text-6xl mb-4">✿</div>
-        <p class="text-pink-800 cursive text-2xl">Cargando tu progreso...</p>
+        <p class="text-pink-800 cursive text-2xl">Cargando tu diario...</p>
     </div>
 
-    <!-- MODAL PARA NOMBRE -->
     <div id="modal-name" class="modal">
         <div class="modal-content">
             <h3 class="text-2xl font-bold text-pink-900 mb-2">¡Bienvenida!</h3>
@@ -149,7 +147,6 @@
         </div>
     </div>
 
-    <!-- MODAL PARA ADMIN -->
     <div id="modal-admin" class="modal">
         <div class="modal-content">
             <h3 class="text-2xl font-bold text-pink-900 mb-2">Acceso Admin</h3>
@@ -160,28 +157,24 @@
         </div>
     </div>
 
-    <!-- VISTA INICIAL -->
     <section id="view-home" class="view active items-center justify-center p-8 text-center">
         <div class="max-w-md w-full">
             <h1 class="serif text-4xl font-bold text-pink-950 mb-2 leading-tight">My Bible Journaling</h1>
             <p class="cursive text-4xl text-pink-500 mb-12">Entre Chicas</p>
-            
             <div class="space-y-4">
                 <button id="btn-go-app" class="btn-primary">INGRESAR AL DIARIO</button>
                 <button id="trigger-admin" class="w-full text-[11px] text-pink-300 font-bold uppercase tracking-[0.3em] py-4 hover:text-pink-600 transition-colors">
                     Panel de Administración
                 </button>
             </div>
-            <p class="text-[10px] text-pink-200 uppercase tracking-widest font-medium mt-10">v3.2 • Estable</p>
+            <p class="text-[10px] text-pink-200 uppercase tracking-widest font-medium mt-10">v3.3 • Edición Estable</p>
         </div>
     </section>
 
-    <!-- MENÚ DE TESTAMENTOS -->
     <section id="view-menu" class="view p-6 items-center justify-center">
-        <div class="max-w-4xl w-full">
-            <h2 class="serif text-4xl text-pink-950 text-center mb-2">Selecciona un Testamento</h2>
-            <p class="cursive text-2xl text-pink-400 text-center mb-12">¿Qué leeremos hoy?</p>
-            
+        <div class="max-w-4xl w-full text-center">
+            <h2 class="serif text-4xl text-pink-950 mb-2">Selecciona un Testamento</h2>
+            <p class="cursive text-2xl text-pink-400 mb-12">¿Qué leeremos hoy?</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div onclick="showBible('antiguo')" class="testament-card">
                     <div class="text-5xl mb-4">📜</div>
@@ -194,11 +187,10 @@
                     <p class="text-xs text-pink-300 uppercase tracking-widest mt-2 font-bold">260 Capítulos</p>
                 </div>
             </div>
-            <button onclick="goToView('view-home')" class="mt-12 block mx-auto text-pink-300 font-bold uppercase text-[10px] tracking-widest">Volver al inicio</button>
+            <button onclick="goToView('view-home')" class="mt-12 text-pink-300 font-bold uppercase text-[10px] tracking-widest">Volver al inicio</button>
         </div>
     </section>
 
-    <!-- VISTA BÍBLIA (SELECTOR) -->
     <section id="view-app" class="view p-4 md:p-10">
         <div class="max-w-5xl mx-auto">
             <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
@@ -209,30 +201,29 @@
                     <h2 id="bible-title" class="serif text-3xl font-bold text-pink-950 uppercase">Antiguo Testamento</h2>
                     <p class="cursive text-xl text-pink-400">Lectura Diaria</p>
                 </div>
-                <div id="trigger-change-name" class="flex items-center gap-4 bg-white p-2 pr-6 rounded-full border border-pink-100 cursor-pointer hover:bg-pink-50">
-                    <div id="user-avatar" class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white text-lg shadow-md">✿</div>
+                <div onclick="openModal('modal-name')" class="flex items-center gap-4 bg-white p-2 pr-6 rounded-full border border-pink-100 cursor-pointer">
+                    <div class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white text-lg shadow-md">✿</div>
                     <div class="text-left">
-                        <div id="display-name" class="text-[10px] font-black text-pink-900 uppercase tracking-tighter leading-none">Invitada</div>
-                        <div id="role-indicator" class="role-badge role-user text-[8px] opacity-50 uppercase font-bold">Lectora</div>
+                        <div id="display-name" class="text-[10px] font-black text-pink-900 uppercase">Invitada</div>
+                        <div class="text-[8px] opacity-50 uppercase font-bold text-pink-800">Lectora</div>
                     </div>
                 </div>
             </header>
 
-            <div class="progress-container max-w-2xl mx-auto mb-12 text-center border-t-4 border-pink-500">
+            <div class="progress-container max-w-2xl mx-auto mb-12 text-center border-t-4 border-pink-500 pt-6">
                 <div id="stats-text" class="text-xl font-extrabold text-pink-900 mb-3 tracking-tighter">0 / 0 Capítulos</div>
                 <div class="w-full bg-pink-50 h-3 rounded-full overflow-hidden p-0.5">
                     <div id="stats-bar" class="bg-pink-500 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
                 </div>
-                <button onclick="forceSave()" class="mt-4 bg-pink-50 px-6 py-2 rounded-xl text-[9px] font-black text-pink-400 uppercase tracking-widest hover:bg-pink-100 transition-all active:scale-95">
+                <button onclick="forceSave()" class="mt-4 bg-pink-50 px-6 py-2 rounded-xl text-[9px] font-black text-pink-400 uppercase tracking-widest hover:bg-pink-100">
                     ☁ Guardar Progreso Manualmente
                 </button>
             </div>
 
-            <div id="bible-content" class="space-y-12 pb-20"></div>
+            <div id="bible-content" class="space-y-12 pb-24"></div>
         </div>
     </section>
 
-    <!-- VISTA ADMINISTRADOR -->
     <section id="view-admin" class="view p-6">
         <div class="max-w-4xl mx-auto w-full">
             <div class="flex justify-between items-end mb-8">
@@ -240,19 +231,21 @@
                     <h2 class="serif text-4xl font-bold text-pink-950">Líderes</h2>
                     <p class="text-pink-400 font-bold uppercase text-[10px] tracking-widest">Seguimiento de grupo</p>
                 </div>
-                <button onclick="goToView('view-home')" class="bg-white p-3 rounded-xl border border-pink-100 text-xs font-bold text-pink-900 uppercase tracking-widest">Volver</button>
+                <button onclick="goToView('view-home')" class="bg-white p-3 rounded-xl border border-pink-100 text-xs font-bold text-pink-900 uppercase tracking-widest">Cerrar</button>
             </div>
             <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-pink-50">
-                <table class="w-full">
-                    <thead class="bg-pink-50">
-                        <tr>
-                            <th class="p-5 text-left text-[10px] uppercase font-black text-pink-900">Usuaria</th>
-                            <th class="p-5 text-left text-[10px] uppercase font-black text-pink-900">Capítulos</th>
-                            <th class="p-5 text-left text-[10px] uppercase font-black text-pink-900">Progreso (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-body"></tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-pink-50">
+                            <tr>
+                                <th class="p-5 text-[10px] uppercase font-black text-pink-900">Usuaria</th>
+                                <th class="p-5 text-[10px] uppercase font-black text-pink-900">Capítulos</th>
+                                <th class="p-5 text-[10px] uppercase font-black text-pink-900">Progreso (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-body"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </section>
@@ -290,19 +283,12 @@
 
         function goToView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            const target = document.getElementById(viewId);
-            if(target) target.classList.add('active');
+            document.getElementById(viewId).classList.add('active');
             window.scrollTo(0,0);
         }
 
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if(modal) modal.classList.add('active');
-        }
-
-        function closeModals() {
-            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-        }
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
 
         async function start() {
             try {
@@ -311,13 +297,9 @@
                 } else {
                     await auth.signInAnonymously();
                 }
-            } catch (e) { 
-                console.error("Error de Auth:", e); 
             } finally {
                 document.getElementById('loading-overlay').style.display = 'none';
-                if(myName) {
-                    document.getElementById('display-name').innerText = myName;
-                }
+                if(myName) document.getElementById('display-name').innerText = myName;
             }
         }
 
@@ -339,16 +321,12 @@
 
         function renderGrid() {
             const container = document.getElementById('bible-content');
-            if (!container) return;
             container.innerHTML = '';
-            const sections = bibleData[currentTestament];
-
-            sections.forEach(sec => {
+            bibleData[currentTestament].forEach(sec => {
                 const wrap = document.createElement('div');
-                wrap.innerHTML = `<h3 class="text-xl font-black text-pink-900 mb-6 uppercase tracking-tighter border-l-4 border-pink-500 pl-4">${sec.title}</h3>`;
+                wrap.innerHTML = `<h3 class="text-xl font-black text-pink-900 mb-6 uppercase border-l-4 border-pink-500 pl-4">${sec.title}</h3>`;
                 const grid = document.createElement('div');
                 grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
-
                 sec.books.forEach(book => {
                     const card = document.createElement('div');
                     card.className = 'book-card';
@@ -357,9 +335,7 @@
                         const key = `${book.n}-${i}`;
                         dots += `<div class="dot ${userProgress[key] ? 'active' : ''}" data-key="${key}">${i}</div>`;
                     }
-                    card.innerHTML = `<div class="text-pink-600 font-black text-sm uppercase mb-3 flex items-center justify-between">
-                        ${book.n} <span class="text-[10px] bg-pink-50 px-2 py-1 rounded">${book.c} cap</span>
-                    </div><div class="flex flex-wrap gap-2 dots-container">${dots}</div>`;
+                    card.innerHTML = `<div class="text-pink-600 font-black text-sm uppercase mb-3">${book.n}</div><div class="flex flex-wrap gap-2">${dots}</div>`;
                     grid.appendChild(card);
                 });
                 wrap.appendChild(grid);
@@ -370,23 +346,18 @@
         }
 
         function attachDragEvents() {
-            const dots = document.querySelectorAll('.dot');
-            dots.forEach(dot => {
+            document.querySelectorAll('.dot').forEach(dot => {
                 dot.onpointerdown = (e) => {
                     isDragging = true;
-                    const key = dot.getAttribute('data-key');
-                    dragAction = !userProgress[key];
-                    userProgress[key] = dragAction;
+                    dragAction = !userProgress[dot.dataset.key];
+                    userProgress[dot.dataset.key] = dragAction;
                     dot.classList.toggle('active', dragAction);
                     dot.releasePointerCapture(e.pointerId);
                     updateStats();
                 };
-
-                dot.onpointerenter = (e) => {
-                    if (!isDragging) return;
-                    const key = dot.getAttribute('data-key');
-                    if (userProgress[key] !== dragAction) {
-                        userProgress[key] = dragAction;
+                dot.onpointerenter = () => {
+                    if (isDragging && userProgress[dot.dataset.key] !== dragAction) {
+                        userProgress[dot.dataset.key] = dragAction;
                         dot.classList.toggle('active', dragAction);
                         updateStats();
                     }
@@ -394,122 +365,72 @@
             });
         }
 
-        window.onpointerup = () => {
-            if (isDragging) {
-                isDragging = false;
-                saveToFirebase();
-            }
-        };
+        window.onpointerup = () => { if (isDragging) { isDragging = false; saveToFirebase(); } };
 
         function updateStats() {
             const total = currentTestament === 'antiguo' ? 929 : 260;
             let done = 0;
-            bibleData[currentTestament].forEach(sec => {
-                sec.books.forEach(b => {
-                    for(let i=1; i<=b.c; i++) if(userProgress[`${b.n}-${i}`]) done++;
-                });
-            });
-            
+            bibleData[currentTestament].forEach(s => s.books.forEach(b => {
+                for(let i=1; i<=b.c; i++) if(userProgress[`${b.n}-${i}`]) done++;
+            }));
             const p = Math.round((done / total) * 100) || 0;
-            const statsText = document.getElementById('stats-text');
-            const statsBar = document.getElementById('stats-bar');
-            if(statsText) statsText.innerText = `${done} / ${total} Capítulos (${p}%)`;
-            if(statsBar) statsBar.style.width = `${p}%`;
+            document.getElementById('stats-text').innerText = `${done} / ${total} Capítulos (${p}%)`;
+            document.getElementById('stats-bar').style.width = `${p}%`;
         }
 
         async function saveToFirebase() {
             const user = auth.currentUser;
             if(!user) return;
-            try {
-                await db.doc(`artifacts/${appId}/users/${user.uid}/progress/current`).set({ chapters: userProgress }, { merge: true });
-                syncReport();
-            } catch(e) { console.error("Error guardando:", e); }
+            await db.doc(`artifacts/${appId}/users/${user.uid}/progress/current`).set({ chapters: userProgress }, { merge: true });
+            if(myName) {
+                let total = 0;
+                [...bibleData.antiguo, ...bibleData.nuevo].forEach(s => s.books.forEach(b => {
+                    for(let i=1; i<=b.c; i++) if(userProgress[`${b.n}-${i}`]) total++;
+                }));
+                db.doc(`artifacts/${appId}/public/data/reports/${user.uid}`).set({
+                    nombre: myName, leidos: total, porcentaje: Math.round((total/1189)*100)
+                }, { merge: true });
+            }
         }
 
-        async function forceSave() {
-            await saveToFirebase();
+        function forceSave() {
+            saveToFirebase();
             const toast = document.getElementById('save-indicator');
-            if(toast) {
-                toast.style.display = 'block';
-                setTimeout(() => toast.style.display = 'none', 2000);
-            }
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 2000);
         }
 
-        async function syncReport() {
-            const user = auth.currentUser;
-            if (!user || !myName) return;
-            let totalDone = 0;
-            [...bibleData.antiguo, ...bibleData.nuevo].forEach(sec => {
-                sec.books.forEach(b => {
-                    for(let i=1; i<=b.c; i++) if(userProgress[`${b.n}-${i}`]) totalDone++;
+        document.getElementById('btn-go-app').onclick = () => { if(!myName) openModal('modal-name'); else goToView('view-menu'); };
+        document.getElementById('trigger-admin').onclick = () => openModal('modal-admin');
+        document.getElementById('btn-save-name').onclick = () => {
+            const name = document.getElementById('input-name').value.trim();
+            if(name) {
+                myName = name;
+                localStorage.setItem('user_bible_name', myName);
+                document.getElementById('display-name').innerText = myName;
+                closeModals();
+                goToView('view-menu');
+            }
+        };
+        document.getElementById('btn-verify-admin').onclick = () => {
+            if(document.getElementById('input-pass').value === "chicas2024") {
+                closeModals();
+                goToView('view-admin');
+                db.collection(`artifacts/${appId}/public/data/reports`).onSnapshot(snap => {
+                    const body = document.getElementById('admin-body');
+                    body.innerHTML = '';
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        body.innerHTML += `<tr class="border-b border-pink-50">
+                            <td class="p-5 font-bold text-pink-900">${d.nombre}</td>
+                            <td class="p-5 text-sm text-gray-500">${d.leidos}</td>
+                            <td class="p-5"><span class="bg-pink-100 text-pink-600 px-3 py-1 rounded-full text-xs font-black">${d.porcentaje}%</span></td>
+                        </tr>`;
+                    });
                 });
-            });
+            } else { alert("Clave incorrecta"); }
+        };
 
-            await db.doc(`artifacts/${appId}/public/data/reports/${user.uid}`).set({
-                nombre: myName,
-                leidos: totalDone,
-                porcentaje: Math.round((totalDone/1189)*100),
-                fecha: new Date().toISOString()
-            }, { merge: true });
-        }
-
-        // Listener Global de Clicks
-        document.addEventListener('click', async (e) => {
-            const id = e.target.id;
-            
-            if (id === 'btn-go-app') {
-                if (!myName) {
-                    openModal('modal-name');
-                } else {
-                    goToView('view-menu');
-                }
-            }
-
-            if (id === 'trigger-admin') openModal('modal-admin');
-
-            if (id === 'btn-save-name') {
-                const input = document.getElementById('input-name').value.trim();
-                if (input) {
-                    myName = input;
-                    localStorage.setItem('user_bible_name', myName);
-                    document.getElementById('display-name').innerText = myName;
-                    closeModals();
-                    goToView('view-menu');
-                    syncReport();
-                }
-            }
-
-            if (id === 'btn-verify-admin') {
-                const pass = document.getElementById('input-pass').value;
-                if (pass === "chicas2024") {
-                    closeModals();
-                    goToView('view-admin');
-                    loadAdminData();
-                } else { 
-                    alert("Clave incorrecta"); 
-                }
-            }
-
-            if (e.target.closest('#trigger-change-name')) openModal('modal-name');
-        });
-
-        function loadAdminData() {
-            db.collection(`artifacts/${appId}/public/data/reports`).onSnapshot(snap => {
-                const body = document.getElementById('admin-body');
-                if(!body) return;
-                body.innerHTML = '';
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    body.innerHTML += `<tr class="border-b border-pink-50">
-                        <td class="p-5 font-bold text-pink-900">${d.nombre}</td>
-                        <td class="p-5 text-sm text-gray-500">${d.leidos}</td>
-                        <td class="p-5"><span class="bg-pink-100 text-pink-600 px-3 py-1 rounded-full text-xs font-black">${d.porcentaje}%</span></td>
-                    </tr>`;
-                });
-            }, err => console.error("Error admin:", err));
-        }
-
-        // Iniciar
         start();
     </script>
 </body>
