@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Entre Chicas - Bible Journaling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDKs (compat mode) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:wght@700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream-bg: #fffcf5;
+            --rose-accent: #ff6b9d;
+            --deep-rose: #d6336c;
+            --soft-pink: #ffe4e9;
+        }
+        body {
+            background-color: var(--cream-bg);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            color: #4a1a2c;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        
+        .view { display: none; min-height: 100vh; animation: fadeIn 0.3s ease; }
+        .view.active { display: flex; flex-direction: column; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .cursive { font-family: 'Dancing Script', cursive; }
+        .serif { font-family: 'Playfair Display', serif; }
+
+        .btn-primary {
+            background: var(--deep-rose);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 800;
+            transition: transform 0.2s, background 0.2s;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(214, 51, 108, 0.2);
+            border: none;
+            width: 100%;
+        }
+        .btn-primary:active { transform: scale(0.95); }
+
+        .testament-card {
+            background: white;
+            padding: 40px 20px;
+            border-radius: 30px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.03);
+        }
+        .testament-card:hover {
+            border-color: var(--rose-accent);
+            transform: translateY(-5px);
+        }
+
+        .dot {
+            width: 32px; height: 32px;
+            border: 1px solid #f1f5f9;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 600; color: #94a3b8;
+            transition: all 0.1s;
+            touch-action: none;
+        }
+        .dot.active {
+            background: var(--rose-accent);
+            border-color: var(--rose-accent);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .book-card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255, 107, 157, 0.1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(74, 26, 44, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        #loading-overlay {
+            position: fixed; inset: 0; background: var(--cream-bg);
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; z-index: 3000;
+        }
+
+        .save-toast {
+            position: fixed; bottom: 20px; right: 20px;
+            background: #059669; color: white;
+            padding: 12px 24px; border-radius: 50px;
+            font-weight: 800; font-size: 12px;
+            display: none; z-index: 4000;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="save-indicator" class="save-toast">✓ PROGRESO GUARDADO</div>
+
+    <!-- PANTALLA CARGA -->
+    <div id="loading-overlay">
+        <div class="animate-bounce text-pink-600 text-6xl mb-4">✿</div>
+        <p class="text-pink-800 cursive text-2xl">Cargando tu progreso...</p>
+    </div>
+
+    <!-- MODAL PARA NOMBRE -->
+    <div id="modal-name" class="modal">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-pink-900 mb-2">¡Bienvenida!</h3>
+            <p class="text-pink-400 text-sm mb-6">¿Cómo te llamas, hermosa?</p>
+            <input type="text" id="input-name" placeholder="Tu nombre aquí" class="w-full p-4 rounded-xl border-2 border-pink-100 mb-4 focus:border-pink-500 outline-none text-center font-bold text-pink-900">
+            <button id="btn-save-name" class="btn-primary">Empezar</button>
+        </div>
+    </div>
+
+    <!-- MODAL PARA ADMIN -->
+    <div id="modal-admin" class="modal">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-pink-900 mb-2">Acceso Admin</h3>
+            <p class="text-pink-400 text-sm mb-6">Introduce la clave</p>
+            <input type="password" id="input-pass" placeholder="Contraseña" class="w-full p-4 rounded-xl border-2 border-pink-100 mb-4 focus:border-pink-500 outline-none text-center">
+            <button id="btn-verify-admin" class="btn-primary mb-2">Entrar</button>
+            <button onclick="closeModals()" class="text-gray-400 text-xs font-bold uppercase py-2">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- VISTA INICIAL -->
+    <section id="view-home" class="view active items-center justify-center p-8 text-center">
+        <div class="max-w-md w-full">
+            <h1 class="serif text-4xl font-bold text-pink-950 mb-2 leading-tight">My Bible Journaling</h1>
+            <p class="cursive text-4xl text-pink-500 mb-12">Entre Chicas</p>
+            
+            <div class="space-y-4">
+                <button id="btn-go-app" class="btn-primary">INGRESAR AL DIARIO</button>
+                <button id="trigger-admin" class="w-full text-[11px] text-pink-300 font-bold uppercase tracking-[0.3em] py-4 hover:text-pink-600 transition-colors">
+                    Panel de Administración
+                </button>
+            </div>
+            <p class="text-[10px] text-pink-200 uppercase tracking-widest font-medium mt-10">v3.2 • Estable</p>
+        </div>
+    </section>
+
+    <!-- MENÚ DE TESTAMENTOS -->
+    <section id="view-menu" class="view p-6 items-center justify-center">
+        <div class="max-w-4xl w-full">
+            <h2 class="serif text-4xl text-pink-950 text-center mb-2">Selecciona un Testamento</h2>
+            <p class="cursive text-2xl text-pink-400 text-center mb-12">¿Qué leeremos hoy?</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div onclick="showBible('antiguo')" class="testament-card">
+                    <div class="text-5xl mb-4">📜</div>
+                    <h3 class="serif text-2xl font-bold text-pink-900">Antiguo Testamento</h3>
+                    <p class="text-xs text-pink-300 uppercase tracking-widest mt-2 font-bold">929 Capítulos</p>
+                </div>
+                <div onclick="showBible('nuevo')" class="testament-card">
+                    <div class="text-5xl mb-4">✨</div>
+                    <h3 class="serif text-2xl font-bold text-pink-900">Nuevo Testamento</h3>
+                    <p class="text-xs text-pink-300 uppercase tracking-widest mt-2 font-bold">260 Capítulos</p>
+                </div>
+            </div>
+            <button onclick="goToView('view-home')" class="mt-12 block mx-auto text-pink-300 font-bold uppercase text-[10px] tracking-widest">Volver al inicio</button>
+        </div>
+    </section>
+
+    <!-- VISTA BÍBLIA (SELECTOR) -->
+    <section id="view-app" class="view p-4 md:p-10">
+        <div class="max-w-5xl mx-auto">
+            <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+                <button onclick="goToView('view-menu')" class="bg-white w-12 h-12 rounded-full flex items-center justify-center text-pink-400 shadow-sm border border-pink-50 hover:bg-pink-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <div class="text-center">
+                    <h2 id="bible-title" class="serif text-3xl font-bold text-pink-950 uppercase">Antiguo Testamento</h2>
+                    <p class="cursive text-xl text-pink-400">Lectura Diaria</p>
+                </div>
+                <div id="trigger-change-name" class="flex items-center gap-4 bg-white p-2 pr-6 rounded-full border border-pink-100 cursor-pointer hover:bg-pink-50">
+                    <div id="user-avatar" class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white text-lg shadow-md">✿</div>
+                    <div class="text-left">
+                        <div id="display-name" class="text-[10px] font-black text-pink-900 uppercase tracking-tighter leading-none">Invitada</div>
+                        <div id="role-indicator" class="role-badge role-user text-[8px] opacity-50 uppercase font-bold">Lectora</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="progress-container max-w-2xl mx-auto mb-12 text-center border-t-4 border-pink-500">
+                <div id="stats-text" class="text-xl font-extrabold text-pink-900 mb-3 tracking-tighter">0 / 0 Capítulos</div>
+                <div class="w-full bg-pink-50 h-3 rounded-full overflow-hidden p-0.5">
+                    <div id="stats-bar" class="bg-pink-500 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+                </div>
+                <button onclick="forceSave()" class="mt-4 bg-pink-50 px-6 py-2 rounded-xl text-[9px] font-black text-pink-400 uppercase tracking-widest hover:bg-pink-100 transition-all active:scale-95">
+                    ☁ Guardar Progreso Manualmente
+                </button>
+            </div>
+
+            <div id="bible-content" class="space-y-12 pb-20"></div>
+        </div>
+    </section>
+
+    <!-- VISTA ADMINISTRADOR -->
+    <section id="view-admin" class="view p-6">
+        <div class="max-w-4xl mx-auto w-full">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <h2 class="serif text-4xl font-bold text-pink-950">Líderes</h2>
+                    <p class="text-pink-400 font-bold uppercase text-[10px] tracking-widest">Seguimiento de grupo</p>
+                </div>
+                <button onclick="goToView('view-home')" class="bg-white p-3 rounded-xl border border-pink-100 text-xs font-bold text-pink-900 uppercase tracking-widest">Volver</button>
+            </div>
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-pink-50">
+                <table class="w-full">
+                    <thead class="bg-pink-50">
+                        <tr>
+                            <th class="p-5 text-left text-[10px] uppercase font-black text-pink-900">Usuaria</th>
+                            <th class="p-5 text-left text-[10px] uppercase font-black text-pink-900">Capítulos</th>
+                            <th class="p-5 text-left text-[10px] uppercase font-black text-pink-900">Progreso (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'bible-tracker-v3';
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let userProgress = {};
+        let myName = localStorage.getItem('user_bible_name') || "";
+        let currentTestament = 'antiguo';
+        let isDragging = false;
+        let dragAction = true;
+
+        const bibleData = {
+            antiguo: [
+                { title: "El Pentateuco", books: [{n:"Génesis",c:50},{n:"Exodo",c:40},{n:"Levítico",c:27},{n:"Números",c:36},{n:"Deuteronomio",c:34}] },
+                { title: "Históricos", books: [{n:"Josué",c:24},{n:"Jueces",c:21},{n:"Ruth",c:4},{n:"1 Samuel",c:31},{n:"2 Samuel",c:24},{n:"1 Reyes",c:22},{n:"2 Reyes",c:25},{n:"1 Cronicas",c:29},{n:"2 Cronicas",c:36},{n:"Esdras",c:10},{n:"Nehemías",c:13},{n:"Ester",c:10}] },
+                { title: "Poéticos", books: [{n:"Job",c:42},{n:"Salmos",c:150},{n:"Proverbios",c:31},{n:"Eclesiastés",c:12},{n:"Cantares",c:8}] },
+                { title: "Profetas Mayores", books: [{n:"Isaías",c:66},{n:"Jeremías",c:52},{n:"Lamentaciones",c:5},{n:"Ezequiel",c:48},{n:"Daniel",c:12}] },
+                { title: "Profetas Menores", books: [{n:"Oseas",c:14},{n:"Joel",c:3},{n:"Amós",c:9},{n:"Abdías",c:1},{n:"Jonás",c:4},{n:"Miqueas",c:7},{n:"Nahum",c:3},{n:"Habacuc",c:3},{n:"Sofonías",c:3},{n:"Hageo",c:2},{n:"Zacarías",c:14},{n:"Malaquías",c:4}] }
+            ],
+            nuevo: [
+                { title: "Evangelios", books: [{n:"Mateo",c:28},{n:"Marcos",c:16},{n:"Lucas",c:24},{n:"Juan",c:21}] },
+                { title: "Historia", books: [{n:"Hechos",c:28}] },
+                { title: "Cartas Paulinas", books: [{n:"Romanos",c:16},{n:"1 Corintios",c:16},{n:"2 Corintios",c:13},{n:"Gálatas",c:6},{n:"Efesios",c:6},{n:"Filipenses",c:4},{n:"Colosenses",c:4},{n:"1 Tesalonicenses",c:5},{n:"2 Tesalonicenses",c:3},{n:"1 Timoteo",c:6},{n:"2 Timoteo",c:4},{n:"Tito",c:3},{n:"Filemón",c:1}] },
+                { title: "Otras Cartas", books: [{n:"Hebreos",c:13},{n:"Santiago",c:5},{n:"1 Pedro",c:5},{n:"2 Pedro",c:3},{n:"1 Juan",c:5},{n:"2 Juan",c:1},{n:"3 Juan",c:1},{n:"Judas",c:1}] },
+                { title: "Profecía", books: [{n:"Apocalipsis",c:22}] }
+            ]
+        };
+
+        function goToView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            const target = document.getElementById(viewId);
+            if(target) target.classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if(modal) modal.classList.add('active');
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+        }
+
+        async function start() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await auth.signInWithCustomToken(__initial_auth_token);
+                } else {
+                    await auth.signInAnonymously();
+                }
+            } catch (e) { 
+                console.error("Error de Auth:", e); 
+            } finally {
+                document.getElementById('loading-overlay').style.display = 'none';
+                if(myName) {
+                    document.getElementById('display-name').innerText = myName;
+                }
+            }
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                db.doc(`artifacts/${appId}/users/${user.uid}/progress/current`).onSnapshot(snap => {
+                    if (snap.exists) userProgress = snap.data().chapters || {};
+                    if(document.getElementById('view-app').classList.contains('active')) renderGrid();
+                });
+            }
+        });
+
+        function showBible(type) {
+            currentTestament = type;
+            document.getElementById('bible-title').innerText = type === 'antiguo' ? 'Antiguo Testamento' : 'Nuevo Testamento';
+            renderGrid();
+            goToView('view-app');
+        }
+
+        function renderGrid() {
+            const container = document.getElementById('bible-content');
+            if (!container) return;
+            container.innerHTML = '';
+            const sections = bibleData[currentTestament];
+
+            sections.forEach(sec => {
+                const wrap = document.createElement('div');
+                wrap.innerHTML = `<h3 class="text-xl font-black text-pink-900 mb-6 uppercase tracking-tighter border-l-4 border-pink-500 pl-4">${sec.title}</h3>`;
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
+
+                sec.books.forEach(book => {
+                    const card = document.createElement('div');
+                    card.className = 'book-card';
+                    let dots = '';
+                    for(let i=1; i<=book.c; i++) {
+                        const key = `${book.n}-${i}`;
+                        dots += `<div class="dot ${userProgress[key] ? 'active' : ''}" data-key="${key}">${i}</div>`;
+                    }
+                    card.innerHTML = `<div class="text-pink-600 font-black text-sm uppercase mb-3 flex items-center justify-between">
+                        ${book.n} <span class="text-[10px] bg-pink-50 px-2 py-1 rounded">${book.c} cap</span>
+                    </div><div class="flex flex-wrap gap-2 dots-container">${dots}</div>`;
+                    grid.appendChild(card);
+                });
+                wrap.appendChild(grid);
+                container.appendChild(wrap);
+            });
+            updateStats();
+            attachDragEvents();
+        }
+
+        function attachDragEvents() {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach(dot => {
+                dot.onpointerdown = (e) => {
+                    isDragging = true;
+                    const key = dot.getAttribute('data-key');
+                    dragAction = !userProgress[key];
+                    userProgress[key] = dragAction;
+                    dot.classList.toggle('active', dragAction);
+                    dot.releasePointerCapture(e.pointerId);
+                    updateStats();
+                };
+
+                dot.onpointerenter = (e) => {
+                    if (!isDragging) return;
+                    const key = dot.getAttribute('data-key');
+                    if (userProgress[key] !== dragAction) {
+                        userProgress[key] = dragAction;
+                        dot.classList.toggle('active', dragAction);
+                        updateStats();
+                    }
+                };
+            });
+        }
+
+        window.onpointerup = () => {
+            if (isDragging) {
+                isDragging = false;
+                saveToFirebase();
+            }
+        };
+
+        function updateStats() {
+            const total = currentTestament === 'antiguo' ? 929 : 260;
+            let done = 0;
+            bibleData[currentTestament].forEach(sec => {
+                sec.books.forEach(b => {
+                    for(let i=1; i<=b.c; i++) if(userProgress[`${b.n}-${i}`]) done++;
+                });
+            });
+            
+            const p = Math.round((done / total) * 100) || 0;
+            const statsText = document.getElementById('stats-text');
+            const statsBar = document.getElementById('stats-bar');
+            if(statsText) statsText.innerText = `${done} / ${total} Capítulos (${p}%)`;
+            if(statsBar) statsBar.style.width = `${p}%`;
+        }
+
+        async function saveToFirebase() {
+            const user = auth.currentUser;
+            if(!user) return;
+            try {
+                await db.doc(`artifacts/${appId}/users/${user.uid}/progress/current`).set({ chapters: userProgress }, { merge: true });
+                syncReport();
+            } catch(e) { console.error("Error guardando:", e); }
+        }
+
+        async function forceSave() {
+            await saveToFirebase();
+            const toast = document.getElementById('save-indicator');
+            if(toast) {
+                toast.style.display = 'block';
+                setTimeout(() => toast.style.display = 'none', 2000);
+            }
+        }
+
+        async function syncReport() {
+            const user = auth.currentUser;
+            if (!user || !myName) return;
+            let totalDone = 0;
+            [...bibleData.antiguo, ...bibleData.nuevo].forEach(sec => {
+                sec.books.forEach(b => {
+                    for(let i=1; i<=b.c; i++) if(userProgress[`${b.n}-${i}`]) totalDone++;
+                });
+            });
+
+            await db.doc(`artifacts/${appId}/public/data/reports/${user.uid}`).set({
+                nombre: myName,
+                leidos: totalDone,
+                porcentaje: Math.round((totalDone/1189)*100),
+                fecha: new Date().toISOString()
+            }, { merge: true });
+        }
+
+        // Listener Global de Clicks
+        document.addEventListener('click', async (e) => {
+            const id = e.target.id;
+            
+            if (id === 'btn-go-app') {
+                if (!myName) {
+                    openModal('modal-name');
+                } else {
+                    goToView('view-menu');
+                }
+            }
+
+            if (id === 'trigger-admin') openModal('modal-admin');
+
+            if (id === 'btn-save-name') {
+                const input = document.getElementById('input-name').value.trim();
+                if (input) {
+                    myName = input;
+                    localStorage.setItem('user_bible_name', myName);
+                    document.getElementById('display-name').innerText = myName;
+                    closeModals();
+                    goToView('view-menu');
+                    syncReport();
+                }
+            }
+
+            if (id === 'btn-verify-admin') {
+                const pass = document.getElementById('input-pass').value;
+                if (pass === "chicas2024") {
+                    closeModals();
+                    goToView('view-admin');
+                    loadAdminData();
+                } else { 
+                    alert("Clave incorrecta"); 
+                }
+            }
+
+            if (e.target.closest('#trigger-change-name')) openModal('modal-name');
+        });
+
+        function loadAdminData() {
+            db.collection(`artifacts/${appId}/public/data/reports`).onSnapshot(snap => {
+                const body = document.getElementById('admin-body');
+                if(!body) return;
+                body.innerHTML = '';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    body.innerHTML += `<tr class="border-b border-pink-50">
+                        <td class="p-5 font-bold text-pink-900">${d.nombre}</td>
+                        <td class="p-5 text-sm text-gray-500">${d.leidos}</td>
+                        <td class="p-5"><span class="bg-pink-100 text-pink-600 px-3 py-1 rounded-full text-xs font-black">${d.porcentaje}%</span></td>
+                    </tr>`;
+                });
+            }, err => console.error("Error admin:", err));
+        }
+
+        // Iniciar
+        start();
+    </script>
+</body>
+</html>
